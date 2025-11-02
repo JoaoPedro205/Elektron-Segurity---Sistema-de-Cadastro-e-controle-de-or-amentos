@@ -1,0 +1,280 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Elektron Segurity - Protótipo</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+</head>
+<body>
+<div id="app" class="container py-4">
+  <nav class="navbar navbar-expand-lg navbar-light bg-light mb-4 rounded">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="#">Elektron Segurity</a>
+      <div class="collapse navbar-collapse">
+        <ul class="navbar-nav me-auto">
+          <li class="nav-item"><a class="nav-link" href="#" @click.prevent="view='home'">Início</a></li>
+          <li class="nav-item"><a class="nav-link" href="#" @click.prevent="view='categories'">Categorias</a></li>
+          <li class="nav-item"><a class="nav-link" href="#" @click.prevent="view='products'">Produtos</a></li>
+          <li class="nav-item"><a class="nav-link" href="#" @click.prevent="view='clients'">Clientes</a></li>
+          <li class="nav-item"><a class="nav-link" href="#" @click.prevent="view='quotes'">Orçamentos</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <div v-if="view==='home'">
+    <h3>Bem-vindo ao Elektron</h3>
+    <p>Use a barra de navegação para gerenciar categorias, produtos, clientes e criar orçamentos.</p>
+  </div>
+
+  <!-- CATEGORIES -->
+  <div v-if="view==='categories'">
+    <h4>Categorias</h4>
+    <form @submit.prevent="createCategory">
+      <div class="input-group mb-3">
+        <input v-model="categoryName" class="form-control" placeholder="Nome da categoria"/>
+        <button class="btn btn-primary" type="submit">Adicionar</button>
+      </div>
+    </form>
+    <ul class="list-group">
+      <li class="list-group-item" v-for="cat in categories" :key="cat.id">
+        {{cat.name}}
+        <button class="btn btn-sm btn-danger float-end" @click="deleteCategory(cat.id)">Remover</button>
+      </li>
+    </ul>
+  </div>
+
+  <!-- PRODUCTS -->
+  <div v-if="view==='products'">
+    <h4>Produtos</h4>
+    <form @submit.prevent="createProduct">
+      <div class="row g-2 mb-2">
+        <div class="col-md-4"><input v-model="productName" class="form-control" placeholder="Nome"/></div>
+        <div class="col-md-3">
+          <select v-model="productCategory" class="form-select">
+            <option value="">Selecione categoria</option>
+            <option v-for="c in categories" :value="c.id">{{c.name}}</option>
+          </select>
+        </div>
+        <div class="col-md-2"><input v-model.number="productPrice" type="number" step="0.01" class="form-control" placeholder="Preço"/></div>
+        <div class="col-md-3"><button class="btn btn-primary w-100" type="submit">Adicionar</button></div>
+      </div>
+    </form>
+
+    <table class="table table-sm">
+      <thead><tr><th>Nome</th><th>Categoria</th><th>Preço</th><th></th></tr></thead>
+      <tbody>
+        <tr v-for="p in products" :key="p.id">
+          <td>{{p.name}}</td>
+          <td>{{catName(p.categoryId)}}</td>
+          <td>R$ {{p.price.toFixed(2)}}</td>
+          <td><button class="btn btn-sm btn-danger" @click="deleteProduct(p.id)">Remover</button></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- CLIENTS -->
+  <div v-if="view==='clients'">
+    <h4>Clientes</h4>
+    <form @submit.prevent="createClient" class="mb-3">
+      <div class="row g-2">
+        <div class="col-md-4"><input v-model="clientName" class="form-control" placeholder="Nome"/></div>
+        <div class="col-md-4"><input v-model="clientEmail" class="form-control" placeholder="Email"/></div>
+        <div class="col-md-3"><input v-model="clientPhone" class="form-control" placeholder="Telefone"/></div>
+        <div class="col-md-1"><button class="btn btn-primary w-100" type="submit">OK</button></div>
+      </div>
+    </form>
+    <ul class="list-group">
+      <li class="list-group-item" v-for="c in clients" :key="c.id">{{c.name}} — {{c.email}}</li>
+    </ul>
+  </div>
+
+  <!-- QUOTES -->
+  <div v-if="view==='quotes'">
+    <h4>Gerar Orçamento</h4>
+    <div class="mb-2">
+      <label>Cliente</label>
+      <select v-model="quoteClient" class="form-select mb-2">
+        <option value="">Selecione cliente</option>
+        <option v-for="c in clients" :value="c.id">{{c.name}}</option>
+      </select>
+
+      <div class="card p-3 mb-2">
+        <div class="row g-2 align-items-center">
+          <div class="col"><select v-model="selProduct" class="form-select"><option value="">Produto</option><option v-for="p in products" :value="p.id">{{p.name}} — R$ {{p.price.toFixed(2)}}</option></select></div>
+          <div class="col-2"><input v-model.number="selQty" type="number" min="1" class="form-control" /></div>
+          <div class="col-2"><button class="btn btn-success w-100" @click="addItem">Adicionar</button></div>
+        </div>
+      </div>
+
+      <table class="table table-sm mb-2" v-if="quoteItems.length">
+        <thead><tr><th>Produto</th><th>Qtd</th><th>Unit</th><th>Subtotal</th><th></th></tr></thead>
+        <tbody>
+          <tr v-for="(it, idx) in quoteItems" :key="idx">
+            <td>{{it.productName}}</td>
+            <td>{{it.quantity}}</td>
+            <td>R$ {{it.unitPrice.toFixed(2)}}</td>
+            <td>R$ {{it.subtotal.toFixed(2)}}</td>
+            <td><button class="btn btn-sm btn-danger" @click="removeItem(idx)">X</button></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="d-flex justify-content-between align-items-center">
+        <div><strong>Total:</strong> R$ {{quoteTotal.toFixed(2)}}</div>
+        <div>
+          <button class="btn btn-primary" @click="saveQuote" :disabled="!canSave">Salvar Orçamento</button>
+        </div>
+      </div>
+
+      <hr/>
+      <h5>Relatórios</h5>
+      <button class="btn btn-outline-secondary" @click="loadQuotes">Carregar Orçamentos</button>
+      <ul class="list-group mt-2">
+        <li class="list-group-item" v-for="q in quotes" :key="q.id">
+          <div><strong>{{q.clientName}}</strong> — {{new Date(q.createdAt).toLocaleString()}}</div>
+          <div>Total: R$ {{q.total.toFixed(2)}}</div>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+</div>
+
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+<script>
+const apiBase = 'http://localhost:8080/api';
+
+const app = Vue.createApp({
+  data() {
+    return {
+      view: 'home',
+      // categories
+      categories: [],
+      categoryName: '',
+      // products
+      products: [],
+      productName: '',
+      productCategory: '',
+      productPrice: 0,
+      // clients
+      clients: [],
+      clientName: '', clientEmail: '', clientPhone: '',
+      // quotes
+      quoteClient: '',
+      selProduct: '', selQty: 1,
+      quoteItems: [],
+      quotes: []
+    };
+  },
+  computed: {
+    quoteTotal() {
+      return this.quoteItems.reduce((s, it) => s + it.subtotal, 0);
+    },
+    canSave() {
+      return this.quoteClient && this.quoteItems.length>0;
+    }
+  },
+  methods: {
+    // categories
+    async loadCategories(){
+      const res = await axios.get(`${apiBase}/categories`);
+      this.categories = res.data;
+    },
+    async createCategory(){
+      if(!this.categoryName) return;
+      await axios.post(`${apiBase}/categories`, { name: this.categoryName });
+      this.categoryName = '';
+      this.loadCategories();
+    },
+    async deleteCategory(id){
+      await axios.delete(`${apiBase}/categories/${id}`);
+      this.loadCategories();
+    },
+
+    // products
+    async loadProducts(){
+      const res = await axios.get(`${apiBase}/products`);
+      this.products = res.data;
+    },
+    catName(id){
+      const c = this.categories.find(x=>x.id===id);
+      return c ? c.name : '';
+    },
+    async createProduct(){
+      if(!this.productName || !this.productCategory) return;
+      await axios.post(`${apiBase}/products`, {
+        name: this.productName, categoryId: this.productCategory, price: Number(this.productPrice)
+      });
+      this.productName=''; this.productPrice=0; this.productCategory='';
+      this.loadProducts();
+    },
+    async deleteProduct(id){ await axios.delete(`${apiBase}/products/${id}`); this.loadProducts(); },
+
+    // clients
+    async loadClients(){ const res = await axios.get(`${apiBase}/clients`); this.clients = res.data; },
+    async createClient(){
+      if(!this.clientName) return;
+      await axios.post(`${apiBase}/clients`, { name: this.clientName, email: this.clientEmail, phone: this.clientPhone });
+      this.clientName=''; this.clientEmail=''; this.clientPhone='';
+      this.loadClients();
+    },
+
+    // quotes
+    addItem(){
+      if(!this.selProduct || this.selQty <= 0) return;
+      const p = this.products.find(x => x.id === this.selProduct);
+      if(!p) return;
+      const item = {
+        productId: p.id,
+        productName: p.name,
+        unitPrice: Number(p.price),
+        quantity: Number(this.selQty),
+        subtotal: Number(p.price) * Number(this.selQty)
+      };
+      this.quoteItems.push(item);
+      this.selProduct=''; this.selQty=1;
+    },
+    removeItem(idx){ this.quoteItems.splice(idx,1); },
+
+    async saveQuote(){
+      if(!this.canSave) return;
+      // build quote payload
+      const client = this.clients.find(c=>c.id===this.quoteClient);
+      const payload = {
+        clientId: this.quoteClient,
+        clientName: client ? client.name : '',
+        items: this.quoteItems,
+        total: this.quoteTotal
+      };
+      await axios.post(`${apiBase}/quotes`, payload);
+      alert('Orçamento salvo!');
+      this.quoteItems = []; this.quoteClient=''; this.loadQuotes();
+    },
+
+    async loadQuotes(){
+      const res = await axios.get(`${apiBase}/quotes`);
+      this.quotes = res.data || [];
+    }
+  },
+  watch: {
+    view(n){ // carregar dados ao mudar de view
+      if(n==='categories') this.loadCategories();
+      if(n==='products'){ this.loadCategories(); this.loadProducts(); }
+      if(n==='clients') this.loadClients();
+      if(n==='quotes'){ this.loadClients(); this.loadProducts(); this.loadQuotes(); }
+    }
+  },
+  mounted(){
+    // inicial
+    this.loadCategories();
+  }
+});
+
+app.mount('#app');
+</script>
+</body>
+</html>
