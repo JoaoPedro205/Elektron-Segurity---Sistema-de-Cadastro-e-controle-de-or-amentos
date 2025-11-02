@@ -21,7 +21,7 @@ A aplicação segue uma **arquitetura cliente-servidor**, onde:
 |                             | Bootstrap 5           | Biblioteca CSS para design responsivo e moderno.                      |
 |                             | Axios                 | Cliente HTTP usado para se comunicar com a API do back-end.           |
 | **Back-end**                | Spring Boot (Java 17) | Framework para construção do servidor e APIs REST.                    |
-| **Banco de Dados (futuro)** | H2 / MySQL / Firebase | O projeto iniciará com H2 e depois poderá integrar Firebase.          |
+| **Banco de Dados (futuro)** | H2 / MySQL / Firebase | O projeto será integrado com Firebase.          |
 | **Controle de versão**      | Git/GitHub            | Armazenamento e versionamento do código.                              |
 
 ---
@@ -36,7 +36,7 @@ O front-end é composto por **cinco seções principais**, acessadas pelo menu d
 | **Categorias**          | Permite criar e excluir categorias de produtos.           |
 | **Produtos**            | Permite cadastrar produtos vinculados a categorias.       |
 | **Clientes**            | Cadastra informações básicas dos clientes.                |
-| **Orçamentos (Quotes)** | Cria orçamentos com múltiplos produtos e calcula o total. |
+| **Orçamentos**          | Cria orçamentos com múltiplos produtos e calcula o total. |
 
 Cada seção é controlada dinamicamente por uma variável Vue chamada `view`, que alterna as telas sem recarregar a página.
 
@@ -48,13 +48,12 @@ Cada seção é controlada dinamicamente por uma variável Vue chamada `view`, q
 
 * Interface reativa feita em Vue.js, totalmente funcional no navegador;
 * Navegação entre telas sem recarregar a página;
-* Cadastro local (via API simulada) de:
+* Tela de Cadastro de:
 
   * Categorias
   * Produtos
   * Clientes
   * Orçamentos
-* Cálculo automático de subtotal e total em orçamentos;
 * Layout responsivo utilizando Bootstrap;
 * Estrutura pronta para integração com o back-end Spring Boot (`http://localhost:8080/api/...`).
 
@@ -115,7 +114,6 @@ Implementar o comportamento interativo das telas usando Vue.js.
 
 * Interface 100% funcional (sem back-end real).
 * Teste de usabilidade no navegador.
-* Função de cálculo de total automático no orçamento.
 
 **Próximos passos:**
 
@@ -242,6 +240,4 @@ Banco de Dados (H2 -> MySQL / Firebase)
 Até o momento, o projeto **Elektron Segurity** encontra-se com **o front-end completo, responsivo e funcional**, preparado para integração com o back-end em Spring Boot.
 O código segue boas práticas de componentização via Vue.js e consumo de API REST via Axios.
 
-Os próximos passos envolvem a **implementação da API, persistência em banco e autenticação via Firebase**, o que consolidará o sistema como uma aplicação web completa, integrando todas as camadas de um ambiente real de desenvolvimento full stack.
-
-Deseja que eu gere algum desses arquivos também (por exemplo, o README técnico do projeto)?
+Os próximos passos envolvem a **implementação da API, persistência em banco, calculo automatico dos orçamentos e autenticação via Firebase**, o que consolidará o sistema como uma aplicação web completa, integrando todas as camadas de um ambiente real de desenvolvimento full stack.
